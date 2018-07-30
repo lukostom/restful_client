@@ -9,31 +9,47 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /* BELOW IS THE JSON RESPONSE FOR PAGE 1, URL: https://jsonmock.hackerrank.com/api/movies/search/?Title=spiderman&page=1
- * {	
- * 		"page":"1",
- * 		"per_page":10,
- * 		"total":13,	
- * 		"total_pages":2,
- * 		"data":
- * 		[
- * 		{	
- * 			"Poster":"https://images-na.ssl-images-amazon.com/images/M/MV5BYjFhN2RjZTctMzA2Ni00NzE2LWJmYjMtNDAyYTllOTkyMmY3XkEyXkFqcGdeQXVyNTA0OTU0OTQ@._V1_SX300.jpg",
- * 			"Title":"Italian Spiderman",
- * 			"Type":"movie",
- * 			"Year":2007,
- * 			"imdbID":"tt2705436"
- * 		},
- * 		{
- * 			"Poster":"https://images-na.ssl-images-amazon.com/images/M/MV5BMjQ4MzcxNDU3N15BMl5BanBnXkFtZTgwOTE1MzMxNzE@._V1_SX300.jpg",
- * 			"Title":"Superman, Spiderman or Batman",
- * 			"Type":"movie",
- * 			"Year":2011,
- * 			"imdbID":"tt2084949"
- * 		},
- * 		... more movies
- * 		
- * 		]
- * 	}
+{
+    "count": 87, 
+    "next": "https://swapi.co/api/people/?page=2", 
+    "previous": null, 
+    "results": [
+        {
+            "name": "Luke Skywalker", 
+            "height": "172", 
+            "mass": "77", 
+            "hair_color": "blond", 
+            "skin_color": "fair", 
+            "eye_color": "blue", 
+            "birth_year": "19BBY", 
+            "gender": "male", 
+            "homeworld": "https://swapi.co/api/planets/1/", 
+            "films": [
+                "https://swapi.co/api/films/2/", 
+                "https://swapi.co/api/films/6/", 
+                "https://swapi.co/api/films/3/", 
+                "https://swapi.co/api/films/1/", 
+                "https://swapi.co/api/films/7/"
+            ], 
+            "species": [
+                "https://swapi.co/api/species/1/"
+            ], 
+            "vehicles": [
+                "https://swapi.co/api/vehicles/14/", 
+                "https://swapi.co/api/vehicles/30/"
+            ], 
+            "starships": [
+                "https://swapi.co/api/starships/12/", 
+                "https://swapi.co/api/starships/22/"
+            ], 
+            "created": "2014-12-09T13:50:51.644000Z", 
+            "edited": "2014-12-20T21:17:56.891000Z", 
+            "url": "https://swapi.co/api/people/1/"
+        }, 
+  		... more people
+  		
+  		]
+  	}
  */
 
 
@@ -42,44 +58,34 @@ import org.json.JSONObject;
  * @author Tomasz
  * this is a controlling class for restful client
  * It will read JSON response (the same type as above) and
- * print list of sorted titles 
+ * print list of sorted names
  */
 public class MainApplication {
-	public static void main(String[] args){
-		// create list that will store all tiles
-		List <String> allTitles = new ArrayList<>();
+	public static void main(String[] args) throws JSONException{
+		// create list that will store all people 
+		List <String> allPeople = new ArrayList<>();
 		
-		//https://jsonmock.hackerrank.com/api/movies/search/?Title=spiderman&page=1
-		String urlLocation = "https://jsonmock.hackerrank.com/api/movies/search/?Title=spiderman";
+		// main url
+		String urlLocation = "https://swapi.co/api/people/";
 		
-		// get string response for given url
-		String response = new HttpClient().getJsonResponse(urlLocation);
+		// next page, starting with initial url
+		String nextPage = urlLocation;
 		
-		//create converter class and use it to convert string to json and json to json array
+		// response string
+		String response;
+		
+		// Json converter to convert string response into JSON
 		JsonConversion jsonConverter = new JsonConversion();
 		
-		// get initial response 
-		JSONObject initialJson = jsonConverter.convertHttpReponseToJson(response);
-
-		// see how many pages are returned
-		int totalPages = 0;
-		if (initialJson != null) {
-			try {
-				totalPages = initialJson.getInt("total_pages");
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-		}
-		
 		// get response (plain and JSON) for each page
-		for (int i = 1; i <= totalPages; i++){
-			response = new HttpClient().getJsonResponse(urlLocation + "&page=" + i);
+		while (!nextPage.equals("null")) {
+			response = new HttpClient().getJsonResponse(nextPage);
 			JSONObject jsonResponse = jsonConverter.convertHttpReponseToJson(response);
 			
 			// get array containing details of each movie
 			JSONArray jsonArray = null;
 			try {
-				 jsonArray = jsonResponse.getJSONArray("data");
+				 jsonArray = jsonResponse.getJSONArray("results");
 			} catch (JSONException e) {
 				e.printStackTrace();
 			}
@@ -89,23 +95,28 @@ public class MainApplication {
 				for (int j = 0; j < jsonArray.length(); j++){
 					try {
 						JSONObject js = jsonArray.getJSONObject(j);
-						String singleTitle = (String)js.get("Title");
-						if (!allTitles.contains(singleTitle)){
-							allTitles.add(singleTitle);
+						String singleName = (String)js.get("name");
+						if (!allPeople.contains(singleName)){
+							allPeople.add(singleName);
 						}
 					}catch(Exception e){
 						e.printStackTrace();
 					}
 				}
 			}
+			
+			// get next page
+			nextPage = jsonResponse.getString("next");
 		}
 		
-		// sort titles 
-		Collections.sort(allTitles);
+		// sort people
+		Collections.sort(allPeople);
 		
+		int counter = 1;
 		// and display them on the screen
-		for (String title : allTitles){
-			System.out.println(title);
+		for (String name : allPeople){
+			System.out.printf("%5d%50s\n",counter, name);
+			counter++;
 		}
 	}
 }
