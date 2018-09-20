@@ -8,7 +8,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
- * @author Tomasz
+ * @author Tomasz Lukos
  * class to make HTTP calls and return response back
  */
 public class HttpClient {
