@@ -55,7 +55,7 @@ import org.json.JSONObject;
 
 
 /**
- * @author Tomasz
+ * @author Tomasz Lukos
  * this is a controlling class for restful client
  * It will read JSON response (the same type as above) and
  * print list of sorted names
